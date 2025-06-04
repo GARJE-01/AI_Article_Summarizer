@@ -15,7 +15,7 @@ This extension extracts the text content from the article page and sends it to t
 Step 1: Clone or Download the Repository
 You can either clone the repo using Git or download it as a ZIP and extract it.
 
-<a href="git clone https://github.com/garje-01/AI_Article_Summarizer.git">
+git clone https://github.com/garje-01/AI_Article_Summarizer.git
 cd AI_Article_Summarizer 
   
 Step 2: Open Chrome Extensions Page
