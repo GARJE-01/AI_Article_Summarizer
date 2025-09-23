@@ -1,134 +1,482 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>AI Summary</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        min-width: 500px;
-        min-height: 300px;
-        padding: 15px;
-      }
-
-      h2 {
-        color: #333;
-        margin-bottom: 15px;
-      }
-
-      .options {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-      }
-
-      button {
-        padding: 8px 15px;
-        background-color: #4285f4;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: bold;
-      }
-
-      button:hover {
-        background-color: #3367d6;
-      }
-
-      #copy-btn {
-        background-color: #34a853;
-      }
-
-      #copy-btn:hover {
-        background-color: #2e8b57;
-      }
-
-      #summary-type {
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-      }
-
-      #result {
-        margin-top: 15px;
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        min-height: 150px;
-        max-height: 400px;
-        overflow-y: auto;
-        white-space: pre-wrap;
-        line-height: 1.5;
-      }
-
-      #result ul {
-        padding-left: 20px;
-      }
-
-      #result li {
-        margin-bottom: 10px;
-      }
-
-      .loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 150px;
-      }
-
-      .loader {
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #3498db;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <h2>AI Summary</h2>
-
-    <div class="options">
-      <select id="summary-type">
-        <option value="brief">Brief Summary</option>
-        <option value="detailed">Detailed Summary</option>
-        <option value="bullets">Bullet Points</option>
-      </select>
-      <button id="summarize">Summarize This Page</button>
-      <button id="copy-btn">Copy Summary</button>
-    </div>
-
-    <div id="result">
-      Select a summary type and click 'Summarize This Page' to generate a
-      summary.
-    </div>
-
-    <script src="config.js"></script>
-    <script src="popup.js"></script>
-  </body>
-</html>
-
-<!-- <!DOCTYPE html>
-<html>
 <head>
-  <title>Ad Blocker</title>
-  <link rel="stylesheet" href="popup.css" />
+  <title>AI Article Summarizer Pro</title>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 450px;
+      min-height: 600px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    .container {
+      background: white;
+      margin: 10px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .controls {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    select, input[type="range"] {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 12px;
+      background: white;
+    }
+
+    .range-value {
+      font-size: 11px;
+      color: #666;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .btn-primary {
+      background: #4285f4;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #3367d6;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #555;
+      border: 1px solid #ddd;
+    }
+
+    .btn-secondary:hover {
+      background: #e9ecef;
+    }
+
+    .btn-success {
+      background: #34a853;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #2e8b47;
+    }
+
+    .btn-warning {
+      background: #ff9800;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #f57c00;
+    }
+
+    .btn-full {
+      grid-column: 1 / -1;
+    }
+
+    .result-container {
+      padding: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .result-stats {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .btn-small {
+      padding: 5px 8px;
+      font-size: 10px;
+    }
+
+    #result {
+      line-height: 1.6;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+
+    .loader {
+      width: 30px;
+      height: 30px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #4285f4;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      color: #d32f2f;
+      background: #ffebee;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #d32f2f;
+      margin: 10px 0;
+    }
+
+    .success {
+      color: #2e7d32;
+      background: #e8f5e8;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #2e7d32;
+      margin: 10px 0;
+    }
+
+    .tooltip {
+      position: relative;
+      cursor: help;
+    }
+
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+
+    .tooltip:hover::after {
+      opacity: 1;
+    }
+
+    .highlighted-word {
+      background: #fff3cd;
+      padding: 1px 3px;
+      border-radius: 3px;
+      cursor: help;
+      position: relative;
+    }
+
+    /* Keyword highlighting styles */
+    #summary-content strong {
+      background-color: #ffeb3b !important;
+      padding: 2px 4px !important;
+      border-radius: 3px !important;
+      font-weight: bold !important;
+      color: #333 !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+    }
+
+    .dark-mode #summary-content strong {
+      background-color: #ffc107 !important;
+      color: #000 !important;
+    }
+
+    .synonym-popup {
+      position: absolute;
+      background: #333;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .dark-mode {
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .container {
+      background: #2d2d2d;
+    }
+
+    .dark-mode .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #137333 100%);
+    }
+
+    .dark-mode select, .dark-mode input {
+      background: #3d3d3d;
+      border-color: #555;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .btn-secondary {
+      background: #3d3d3d;
+      color: #e0e0e0;
+      border-color: #555;
+    }
+
+    .dark-mode #result {
+      color: #e0e0e0;
+    }
+
+    .history-item {
+      padding: 10px;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .history-item:hover {
+      background: #f8f9fa;
+      border-color: #4285f4;
+    }
+
+    .history-item h4 {
+      font-size: 12px;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .history-item p {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .history-item .preview {
+      font-size: 11px;
+      color: #888;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dark-mode .history-item {
+      border-color: #555;
+    }
+
+    .dark-mode .history-item:hover {
+      background: #3d3d3d;
+    }
+
+    .dark-mode .history-item h4 {
+      color: #e0e0e0;
+    }
+
+    .dark-mode .history-item p {
+      color: #aaa;
+    }
+
+    .dark-mode .history-item .preview {
+      color: #888;
+    }
+  </style>
 </head>
 <body>
-  <h1>Ad Blocker</h1>
-  <div class="status" id="status">Status: Enabled</div>
-  <button id="toggle">Disable Blocking</button>
-  <div class="footer">Made by Mayur</div>
+  <div class="container">
+    <div class="header">
+      <h1>AI Article Summarizer Pro</h1>
+      <p>Free Edition - Advanced AI Summarization</p>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="summary-type">Summary Format</label>
+        <select id="summary-type">
+          <option value="brief">Brief Summary</option>
+          <option value="detailed">Detailed Summary</option>
+          <option value="bullets">Bullet Points</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="summary-length">Summary Length</label>
+        <div class="control-row">
+          <input type="range" id="summary-length" min="1" max="3" value="2">
+          <span class="range-value" id="length-value">Medium</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="rephrase-style">Rephrase Style</label>
+        <select id="rephrase-style">
+          <option value="original">Original</option>
+          <option value="formal">Formal</option>
+          <option value="casual">Casual</option>
+          <option value="simplified">Simplified</option>
+        </select>
+      </div>
+
+      <div class="buttons">
+        <button id="summarize" class="btn btn-primary">
+          <span>📄</span> Summarize
+        </button>
+        <button id="rephrase" class="btn btn-secondary" disabled>
+          <span>✏️</span> Rephrase
+        </button>
+        <button id="grammar-check" class="btn btn-warning" disabled>
+          <span>✅</span> Grammar
+        </button>
+        <button id="highlight-keywords" class="btn btn-secondary" disabled>
+          <span>🔍</span> Keywords
+        </button>
+        <button id="voice-read" class="btn btn-secondary" disabled>
+          <span>🔊</span> Read Aloud
+        </button>
+        <button id="vocab-helper" class="btn btn-secondary" disabled>
+          <span>🧠</span> Vocabulary
+        </button>
+        <button id="copy-btn" class="btn btn-success" disabled>
+          <span>📋</span> Copy
+        </button>
+      </div>
+
+      <div class="buttons">
+        <button id="export-pdf" class="btn btn-secondary btn-small" disabled>
+          <span>📄</span> PDF
+        </button>
+        <button id="export-txt" class="btn btn-secondary btn-small" disabled>
+          <span>📝</span> TXT
+        </button>
+        <button id="share-twitter" class="btn btn-secondary btn-small" disabled>
+          <span>🐦</span> Twitter
+        </button>
+        <button id="share-linkedin" class="btn btn-secondary btn-small" disabled>
+          <span>💼</span> LinkedIn
+        </button>
+        <button id="share-whatsapp" class="btn btn-secondary btn-small" disabled>
+          <span>💬</span> WhatsApp
+        </button>
+        <button id="plagiarism-check" class="btn btn-warning btn-small" disabled>
+          <span>🔍</span> Check
+        </button>
+      </div>
+
+      <div class="buttons">
+        <button id="show-history" class="btn btn-secondary btn-full">
+          <span>📚</span> View History
+        </button>
+        <button id="toggle-dark" class="btn btn-secondary btn-full">
+          <span>🌙</span> Dark Mode
+        </button>
+        <button id="open-options" class="btn btn-secondary btn-full">
+          <span>⚙️</span> Settings
+        </button>
+      </div>
+    </div>
+
+    <div class="result-container">
+      <div id="result">
+        <div class="loading">
+          <div class="loader"></div>
+          <p>Select options and click 'Summarize' to generate a summary</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="libs/jspdf.min.js"></script>
+  <script src="libs/export-utils.js"></script>
+  <script src="config.js"></script>
   <script src="popup.js"></script>
 </body>
-</html> -->
+</html>
