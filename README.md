@@ -232,4 +232,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **AI Article Summarizer Pro (Free Edition)** - Making information consumption faster and more efficient with the power of AI.
 
-*Last updated: December 2024*
+<h2>📬 Contact</h2>
+<hr>
+<p>
+  <a href="https://www.linkedin.com/in/mayurgarjeofficial" target="_blank">
+    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" style="width: 10%;" alt="LinkedIn">
+  </a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/GARJE-01" target="_blank">
+    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" style="width: 10%;" alt="GitHub">
+  </a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://www.facebook.com/gaming.mayur.5" target="_blank">
+    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg" style="width: 10%;" alt="Facebook">
+  </a>
+</p>
