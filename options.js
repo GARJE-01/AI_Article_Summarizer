@@ -162,8 +162,25 @@ class OptionsManager {
     this.showMessage('Testing API connection...', 'success');
 
     try {
+      // Discover model dynamically to future-proof
+      const listUrl = (typeof CONFIG !== 'undefined' && CONFIG.GEMINI_MODELS_LIST_URL)
+        ? CONFIG.GEMINI_MODELS_LIST_URL
+        : 'https://generativelanguage.googleapis.com/v1/models';
+      const resList = await fetch(`${listUrl}?key=${apiKey}`);
+      if (!resList.ok) throw new Error('Failed to list models');
+      const listData = await resList.json();
+      const models = Array.isArray(listData.models) ? listData.models.map(m => m.name) : [];
+      const preferences = (typeof CONFIG !== 'undefined' && Array.isArray(CONFIG.GEMINI_MODEL_PREFERENCE))
+        ? CONFIG.GEMINI_MODEL_PREFERENCE
+        : ['models/gemini-1.5-flash','models/gemini-1.5-pro','models/gemini-1.0-pro','models/gemini-pro'];
+      const chosen = preferences.find(pref => models.includes(pref) || models.some(m => m.startsWith(pref)))
+        || models.find(m => /gemini/i.test(m))
+        || 'models/gemini-pro';
+
+      const base = 'https://generativelanguage.googleapis.com/v1';
+      const endpoint = `${base}/${chosen}:generateContent`;
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `${endpoint}?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

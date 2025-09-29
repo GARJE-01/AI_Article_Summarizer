@@ -9,6 +9,7 @@ class ArticleSummarizerPro {
     this.history = [];
     this.speechSynthesis = window.speechSynthesis;
     this.currentUtterance = null;
+    this.resolvedModel = null;
     
     this.init();
   }
@@ -146,6 +147,46 @@ class ArticleSummarizerPro {
     }
   }
 
+  async resolveBestModel(apiKey, forceRefresh = false) {
+    try {
+      // Use cached model if fresh
+      const cacheKey = 'gemini_model_cache';
+      const cached = await new Promise((resolve) => {
+        chrome.storage.local.get([cacheKey], (res) => resolve(res[cacheKey]));
+      });
+      const now = Date.now();
+      if (!forceRefresh && cached && cached.model && cached.expiresAt && cached.expiresAt > now) {
+        this.resolvedModel = cached.model;
+        return cached.model;
+      }
+
+      const listUrl = (typeof CONFIG !== 'undefined' && CONFIG.GEMINI_MODELS_LIST_URL)
+        ? CONFIG.GEMINI_MODELS_LIST_URL
+        : 'https://generativelanguage.googleapis.com/v1/models';
+      const res = await fetch(`${listUrl}?key=${apiKey}`);
+      if (!res.ok) throw new Error('Failed to list models');
+      const data = await res.json();
+      const models = Array.isArray(data.models) ? data.models.map(m => m.name) : [];
+
+      const preferences = (typeof CONFIG !== 'undefined' && Array.isArray(CONFIG.GEMINI_MODEL_PREFERENCE))
+        ? CONFIG.GEMINI_MODEL_PREFERENCE
+        : ['models/gemini-1.5-flash','models/gemini-1.5-pro','models/gemini-1.0-pro','models/gemini-pro'];
+
+      // Find first preferred model that exists and supports generateContent
+      const chosen = preferences.find(pref => models.includes(pref) || models.some(m => m.startsWith(pref)));
+      const finalModel = chosen || models.find(m => /gemini/i.test(m)) || 'models/gemini-pro';
+
+      this.resolvedModel = finalModel;
+      const ttl = (typeof CONFIG !== 'undefined' && CONFIG.GEMINI_MODEL_CACHE_TTL_MS) ? CONFIG.GEMINI_MODEL_CACHE_TTL_MS : (24*60*60*1000);
+      await chrome.storage.local.set({ [cacheKey]: { model: finalModel, expiresAt: now + ttl } });
+      return finalModel;
+    } catch (_) {
+      // Fallback to a safe default
+      this.resolvedModel = 'models/gemini-pro';
+      return this.resolvedModel;
+    }
+  }
+
   async getGeminiSummary(text, summaryType, length) {
     const maxLength = 20000;
     const truncatedText = text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
@@ -214,25 +255,8 @@ ${truncatedText}`;
         }
     }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.settings.geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.2 }
-        })
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || 'API request failed');
-    }
-
-    const data = await response.json();
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No summary available.';
+    const data = await this._callGeminiAPI(prompt, 0.2);
+    return data || 'No summary available.';
   }
 
   displaySummary(summary) {
@@ -319,29 +343,84 @@ ${truncatedText}`;
 
       const prompt = `Rephrase the following summary ${stylePrompts[style]}:\n\n${this.currentSummary}`;
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.settings.geminiApiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.3 }
-          })
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to rephrase summary');
-      }
-
-      const data = await response.json();
-      const rephrasedSummary = data?.candidates?.[0]?.content?.parts?.[0]?.text || this.currentSummary;
+      const data = await this._callGeminiAPI(prompt, 0.3);
+      const rephrasedSummary = data || this.currentSummary;
       this.currentSummary = rephrasedSummary;
       this.displaySummary(rephrasedSummary);
 
     } catch (error) {
       this.showError('Failed to rephrase summary. Please try again.');
+    }
+  }
+
+  async _callGeminiAPI(prompt, temperature) {
+    const cacheKey = 'gemini_model_cache';
+    const attemptFetch = async (forceRefresh = false) => {
+      const model = await this.resolveBestModel(this.settings.geminiApiKey, forceRefresh);
+      const apiUrl = `https://generativelanguage.googleapis.com/v1/${model}:generateContent`;
+
+      const response = await fetch(
+        `${apiUrl}?key=${this.settings.geminiApiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature }
+          })
+        }
+      );
+
+      return { response, model };
+    };
+
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const forceRefresh = attempt > 1; // refresh model cache on retries
+        const { response } = await attemptFetch(forceRefresh);
+
+        if (!response.ok) {
+          let message = `API request failed (status ${response.status})`;
+          let errorBody;
+          try {
+            errorBody = await response.json();
+            message = errorBody.error?.message || message;
+          } catch (e) {
+            try {
+              const text = await response.text();
+              if (text) message += `: ${text}`;
+            } catch (_) {}
+          }
+
+          // If model is invalid/not supported, invalidate cache and retry once
+          if (response.status === 404 || /not found|not supported/i.test(message)) {
+            await new Promise((resolve) => chrome.storage.local.remove([cacheKey], () => resolve()));
+            if (attempt < 3) {
+              await sleep(300);
+              continue;
+            }
+          }
+
+          // Retry on transient errors
+          if ((response.status >= 500 || response.status === 429) && attempt < 3) {
+            await sleep(400 * attempt);
+            continue;
+          }
+
+          throw new Error(message);
+        }
+
+        const data = await response.json();
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      } catch (err) {
+        if (attempt < 3) {
+          await sleep(300 * attempt);
+          continue;
+        }
+        throw err;
+      }
     }
   }
 
@@ -530,20 +609,39 @@ ${truncatedText}`;
     }
 
     const resultDiv = document.getElementById('result');
-    let historyHTML = '<div class="history-container">';
-    
-    this.history.reverse().forEach((item, index) => {
-      historyHTML += `
-        <div class="history-item" onclick="summarizer.loadFromHistory(${this.history.length - 1 - index})">
-          <h4>${item.title || 'Untitled'}</h4>
-          <p>${item.timestamp} • ${item.url}</p>
-          <div class="preview">${item.summary.substring(0, 100)}...</div>
-        </div>
-      `;
+    const container = document.createElement('div');
+    container.className = 'history-container';
+
+    // Use a stable copy to avoid mutating original order
+    const items = [...this.history];
+    items.slice().reverse().forEach((item, reversedIndex) => {
+      const originalIndex = items.length - 1 - reversedIndex;
+      const card = document.createElement('div');
+      card.className = 'history-item';
+
+      const title = document.createElement('h4');
+      title.textContent = item.title || 'Untitled';
+
+      const meta = document.createElement('p');
+      meta.textContent = `${item.timestamp} • ${item.url}`;
+
+      const preview = document.createElement('div');
+      preview.className = 'preview';
+      preview.textContent = `${item.summary.substring(0, 100)}...`;
+
+      card.appendChild(title);
+      card.appendChild(meta);
+      card.appendChild(preview);
+
+      card.addEventListener('click', () => {
+        this.loadFromHistory(originalIndex);
+      });
+
+      container.appendChild(card);
     });
-    
-    historyHTML += '</div>';
-    resultDiv.innerHTML = historyHTML;
+
+    resultDiv.innerHTML = '';
+    resultDiv.appendChild(container);
   }
 
   loadFromHistory(index) {

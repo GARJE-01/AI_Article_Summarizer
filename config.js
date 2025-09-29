@@ -3,7 +3,17 @@
 
 const CONFIG = {
   // API Configuration
-  GEMINI_API_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+  GEMINI_API_BASE_URL: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent',
+  GEMINI_MODELS_LIST_URL: 'https://generativelanguage.googleapis.com/v1/models',
+  GEMINI_MODEL_PREFERENCE: [
+    // Ordered preference; we'll auto-detect availability at runtime
+    'models/gemini-1.5-flash',
+    'models/gemini-1.5-flash-8b',
+    'models/gemini-1.5-pro',
+    'models/gemini-1.0-pro',
+    'models/gemini-pro'
+  ],
+  GEMINI_MODEL_CACHE_TTL_MS: 24 * 60 * 60 * 1000,
   LANGUAGETOOL_API_URL: 'https://api.languagetool.org/v2/check',
   
   // Default Settings
