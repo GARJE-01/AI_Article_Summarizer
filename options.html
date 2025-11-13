@@ -1,119 +1,469 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>AI Summary Settings</title>
+  <title>AI Article Summarizer Pro - Settings</title>
+  <meta charset="UTF-8">
     <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
   body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #f5f7fa;
-    margin: 0;
-    padding: 40px 20px;
-    max-width: 600px;
-    margin: auto;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
     color: #333;
   }
 
-  h1 {
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+      color: white;
+      padding: 30px;
     text-align: center;
-    color: #202124;
-    margin-bottom: 30px;
-    font-size: 26px;
-    letter-spacing: 0.5px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .section {
+      margin-bottom: 40px;
+      padding: 25px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 20px;
+      border-bottom: 2px solid #4285f4;
+      padding-bottom: 10px;
   }
 
   .form-group {
-    background-color: #fff;
-    padding: 20px 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    margin-bottom: 30px;
-    border: 1px solid #e2e8f0;
-  }
+      margin-bottom: 20px;
+    }
 
-  label {
+    .form-group label {
     display: block;
-    margin-bottom: 10px;
+      margin-bottom: 8px;
     font-weight: 600;
+      color: #555;
     font-size: 14px;
-    color: #444;
   }
 
-  input[type="text"] {
+    .form-group input,
+    .form-group select {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ccd4dc;
-    border-radius: 8px;
-    font-size: 15px;
-    background-color: #fefefe;
-    transition: border 0.2s ease;
-  }
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      background: white;
+      transition: border-color 0.2s ease;
+    }
 
-  input[type="text"]:focus {
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
     border-color: #4285f4;
-    outline: none;
     box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
   }
 
-  a {
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .range-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .range-group input[type="range"] {
+      flex: 1;
+    }
+
+    .range-value {
+      font-weight: 600;
+      color: #4285f4;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    .help-text a {
     color: #4285f4;
     text-decoration: none;
-    font-size: 14px;
   }
 
-  a:hover {
+    .help-text a:hover {
     text-decoration: underline;
   }
 
-  button {
-    display: block;
-    width: 100%;
-    background-color: #4285f4;
-    color: white;
+    .buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 6px;
     font-size: 16px;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
+      font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
+      transition: all 0.2s ease;
+      min-width: 120px;
+    }
 
-  button:hover {
-    background-color: #3367d6;
-  }
+    .btn-primary {
+      background: #4285f4;
+      color: white;
+    }
 
-  .success-message {
-    color: green;
-    margin-top: 15px;
-    text-align: center;
+    .btn-primary:hover {
+      background: #3367d6;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #555;
+      border: 1px solid #ddd;
+    }
+
+    .btn-secondary:hover {
+      background: #e9ecef;
+    }
+
+    .btn-success {
+      background: #34a853;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #2e8b47;
+    }
+
+    .message {
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
     font-weight: 500;
     display: none;
   }
 
-  p {
-    font-size: 14px;
-    color: #555;
+    .message.success {
+      background: #e8f5e8;
+      color: #2e7d32;
+      border: 1px solid #4caf50;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: #d32f2f;
+      border: 1px solid #f44336;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .feature-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+
+    .feature-list li::before {
+      content: "✅";
+      font-size: 16px;
+    }
+
+    .dark-mode {
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .container {
+      background: #2d2d2d;
+    }
+
+    .dark-mode .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #137333 100%);
+    }
+
+    .dark-mode .section {
+      background: #3d3d3d;
+      border-color: #555;
+    }
+
+    .dark-mode .section h2 {
+      color: #e0e0e0;
+      border-bottom-color: #1a73e8;
+    }
+
+    .dark-mode .form-group input,
+    .dark-mode .form-group select {
+      background: #4d4d4d;
+      border-color: #666;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .form-group input:focus,
+    .dark-mode .form-group select:focus {
+      border-color: #1a73e8;
+    }
+
+    .dark-mode .form-group label {
+      color: #e0e0e0;
+    }
+
+    .dark-mode .help-text {
+      color: #aaa;
+    }
+
+    .dark-mode .btn-secondary {
+      background: #4d4d4d;
+      color: #e0e0e0;
+      border-color: #666;
+    }
+
+    .dark-mode .btn-secondary:hover {
+      background: #5d5d5d;
+    }
+
+    .dark-mode .feature-list li {
+      border-bottom-color: #555;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .buttons {
+        flex-direction: column;
+      }
+      
+      .content {
+        padding: 20px;
+      }
   }
 </style>
-
   </head>
   <body>
-    <h1>AI Summary Settings</h1>
-
-    <div class="form-group">
-      <label for="api-key">Gemini API Key:</label>
-      <input type="text" id="api-key" placeholder="Enter your Gemini API key" />
-      <p>
-        You can get an API key from
-        <a href="https://makersuite.google.com/app/apikey" target="_blank"
-          >Google AI Studio</a
-        >
-      </p>
+  <div class="container">
+    <div class="header">
+      <h1>AI Article Summarizer Pro</h1>
+      <p>Free Edition - Advanced Settings & Configuration</p>
     </div>
 
-    <button id="save-button">Save Settings</button>
-    <p id="success-message" class="success-message">
-      Settings saved successfully!
-    </p>
+    <div class="content">
+      <div class="message" id="message"></div>
+
+      <!-- API Configuration -->
+      <div class="section">
+        <h2>🔑 API Configuration</h2>
+        
+        <div class="form-group">
+          <label for="gemini-api-key">Gemini API Key</label>
+          <input type="text" id="gemini-api-key" placeholder="Enter your Gemini API key">
+          <div class="help-text">
+            Get your free API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>. 
+            The free tier includes 15 requests per minute and 1 million tokens per day.
+          </div>
+        </div>
+      </div>
+
+      <!-- Display Settings -->
+      <div class="section">
+        <h2>🎨 Display Settings</h2>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="font-size">Font Size</label>
+            <select id="font-size">
+              <option value="12px">Small (12px)</option>
+              <option value="13px" selected>Medium (13px)</option>
+              <option value="14px">Large (14px)</option>
+              <option value="15px">Extra Large (15px)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="font-family">Font Family</label>
+            <select id="font-family">
+              <option value="Segoe UI" selected>Segoe UI</option>
+              <option value="Arial">Arial</option>
+              <option value="Helvetica">Helvetica</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="Verdana">Verdana</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="dark-mode">
+            <label for="dark-mode">Enable Dark Mode</label>
+          </div>
+          <div class="help-text">Toggle between light and dark themes for better viewing experience</div>
+        </div>
+      </div>
+
+      <!-- Summary Settings -->
+      <div class="section">
+        <h2>📝 Summary Settings</h2>
+        
+        <div class="form-group">
+          <label for="default-summary-length">Default Summary Length</label>
+          <div class="range-group">
+            <input type="range" id="default-summary-length" min="1" max="3" value="2">
+            <span class="range-value" id="length-display">Medium</span>
+          </div>
+          <div class="help-text">Set the default length for generated summaries (Short, Medium, Long)</div>
+        </div>
+
+        <div class="form-group">
+          <label for="default-rephrase-style">Default Rephrase Style</label>
+          <select id="default-rephrase-style">
+            <option value="original" selected>Original</option>
+            <option value="formal">Formal</option>
+            <option value="casual">Casual</option>
+            <option value="simplified">Simplified</option>
+          </select>
+          <div class="help-text">Choose the default style for rephrasing summaries</div>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="auto-summarize">
+            <label for="auto-summarize">Auto-Summarize on Page Load</label>
+          </div>
+          <div class="help-text">Automatically generate summary when opening the extension popup</div>
+        </div>
+      </div>
+
+      <!-- Advanced Features -->
+      <div class="section">
+        <h2>⚡ Advanced Features</h2>
+        
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="enable-grammar-check" checked>
+            <label for="enable-grammar-check">Enable Grammar Check</label>
+          </div>
+          <div class="help-text">Use LanguageTool API for grammar correction (free tier)</div>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="enable-voice-read" checked>
+            <label for="enable-voice-read">Enable Voice Read-Aloud</label>
+          </div>
+          <div class="help-text">Use browser's built-in text-to-speech for reading summaries</div>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="enable-keyword-highlight" checked>
+            <label for="enable-keyword-highlight">Enable Keyword Highlighting</label>
+          </div>
+          <div class="help-text">Automatically highlight important keywords in summaries</div>
+        </div>
+
+    <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="enable-topic-classification" checked>
+            <label for="enable-topic-classification">Enable Topic Classification</label>
+          </div>
+          <div class="help-text">Automatically detect and display article topics</div>
+        </div>
+      </div>
+
+      <!-- Features Overview -->
+      <div class="section">
+        <h2>✨ Available Features</h2>
+        <ul class="feature-list">
+          <li>AI-powered article summarization (Brief, Detailed, Bullet Points)</li>
+          <li>Multiple export formats (PDF, TXT, Markdown, DOCX)</li>
+          <li>Text enhancement tools (Rephrase, Grammar Check, Keyword Highlight)</li>
+          <li>Reading time estimation and topic classification</li>
+          <li>Summary history with local storage (last 10 summaries)</li>
+          <li>One-click sharing to social media platforms</li>
+          <li>Voice read-aloud using Web Speech API</li>
+          <li>Original text highlighting on web pages</li>
+          <li>Dark mode and customizable fonts</li>
+          <li>Basic plagiarism checking via Google Search</li>
+          <li>Offline mode for previously generated summaries</li>
+          <li>Auto-summarize on page load option</li>
+        </ul>
+    </div>
+
+      <!-- Action Buttons -->
+      <div class="buttons">
+        <button class="btn btn-primary" id="save-settings">Save Settings</button>
+        <button class="btn btn-secondary" id="reset-settings">Reset to Defaults</button>
+        <button class="btn btn-success" id="test-api">Test API Connection</button>
+      </div>
+    </div>
+  </div>
 
     <script src="options.js"></script>
   </body>
